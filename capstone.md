@@ -31,56 +31,26 @@ FSND Capstone project
 
 - [x] Setup a remote Git [repository](https://github.com/AlFX/FSND_capstone)
 - [x] Setup the database
-    - Create a database using `createdb` in Postgres
-    - Establish a connection to the database, add its URI to `config.py`
-    - Create the table models and estabilish relationships among them
-    - Create the database table running the migrations
-    - Seed the database with `populate.py` and `dummy_data.py`
+    - [x] Create a database using `createdb <name>` in `postgres`
+    - [x] Establish a connection to the database, add its URI to `config.py`
+    - [x] Create the table models and estabilish relationships among them
+    - [x] Create the database table running the migrations
+        ```bash
+        flask db init
+        flask db migrate
+        flask db upgrade
+        ```
+        if iteration is needed, reset the database as follows within `postgres`:
+        ```bash
+        dropdb <name> && createdb <name>
+        ```
+    - [x] Seed the database with `populate.py` and `dummy_data.py`
 - [ ] Write the tests for the routes
+- [ ] Write the basic app factory function in `__init__.py`
 - [ ] Write the routes which can either serve as API or to display views
     - If a frontend is needed, write the HTML, CSS and Javascript for the views
     - Remeber: they must satisfy the tests!
+- [ ] Test an alternative `models.py` file to make the relationships uniform, either using `backref` or `back_populates` but not both!
 - [ ] **Run the app**: `FLASK_APP=app.py FLASK_DEBUG=true flask run`
 - [ ] Setup the [roles](auth0.com)
 - [ ] Deploy to [Heroku](dashboard.heroku.com)
-
-
-#### Project layout
-
-```
-/home/user/Projects/flask-tutorial
-├── app/
-│   ├── __init__.py
-│   ├── db.py
-│   ├── schema.sql
-│   ├── auth.py
-│   ├── blog.py
-│   ├── templates/
-│   │   ├── base.html
-│   │   ├── auth/
-│   │   │   ├── login.html
-│   │   │   └── register.html
-│   │   └── blog/
-│   │       ├── create.html
-│   │       ├── index.html
-│   │       └── update.html
-│   └── static/
-│       └── style.css
-├── tests/
-│   ├── conftest.py
-│   ├── data.sql
-│   ├── test_factory.py
-│   ├── test_db.py
-│   ├── test_auth.py
-│   └── test_blog.py
-├── venv/
-├── setup.py
-└── MANIFEST.in
-
-```
-
-
-Miscellaneous
--------------
-
-- In order to be able to launch multiple configuration sets (eg: development, production, testing) of the app, configure it through a Config object

@@ -17,7 +17,7 @@ def create_app(test_config=None):
 
     @app.route('/')
     def index():
-        return "ok."
+        return "Hello World!"
 
     return app
 
