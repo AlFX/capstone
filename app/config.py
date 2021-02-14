@@ -22,4 +22,4 @@ class Config:
     #     return SQLALCHEMY_DATABASE_URI
 
     SQLALCHEMY_DATABASE_URI = \
-        f"postgres://{username}:{password}@{host}:{port}/{db_name}"
+        f"postgresql://{username}:{password}@{host}:{port}/{db_name}"
