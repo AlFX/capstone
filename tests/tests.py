@@ -37,6 +37,15 @@ class BasicTestCase(unittest.TestCase):
             'new_title': 'aruopolo',
             'release_date': '2000-01-01',
         }
+
+        self.test_actor = {
+            'name': 'asd',
+            'new_name': 'iop',
+            'surname': 'qwe',
+            'dob': '2000-01-01',
+            'gender': 'male'
+        }
+
         self.total_movies = 5
         self.total_actors = 6
         self.total_genres = 14
@@ -61,7 +70,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(data['actor']['surname'], 'Bogart')
 
     def test_get_actor_not_found(self):
-        res = self.client().get('/actors/99')
+        res = self.client().get('/actors/0')
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['error'], 404)
@@ -90,7 +99,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Not found.')
 
-    def test_1_get_movies(self):
+    def test_get_movies(self):
         res = self.client().get('/movies')
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
@@ -119,7 +128,7 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['genre']), self.total_genres)
 
-    def test_2_add_movie(self):
+    def test_movie_1_add(self):
         # add
         res = self.client().post(f"/movies/add?title={self.test_movie['title']}")
         data = json.loads(res.data)
@@ -128,14 +137,14 @@ class BasicTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertEqual(len(all_movies), self.total_movies+1)
 
-    def test_3_update_movie(self):
+    def test_movie_2_update(self):
         # get the test movie from the database
         movie = Movie.query.filter_by(title=self.test_movie['title']
                                       .capitalize()).one_or_none()
+        # update
         res = self.client()\
             .patch(f"/movies/update/{movie.id}?title={self.test_movie['new_title']}")
         data = json.loads(res.data)
-        # update
         movie = Movie.query.get(movie.id)
         self.assertEqual(data['success'], True)
         self.assertEqual(data['updated'], movie.id)
@@ -143,20 +152,57 @@ class BasicTestCase(unittest.TestCase):
         # capitalization upon input, see capitalize_all() helper function
         self.assertEqual(movie.title.lower(), self.test_movie['new_title'])
 
-    def test_4_delete_movie(self):
+    def test_movie_3_delete(self):
         # delete
         movie = Movie.query.filter_by(title=self.test_movie['new_title']
                                       .capitalize()).one_or_none()
         res = self.client().delete(f"/movies/delete/{movie.id}")
         data = json.loads(res.data)
-        # update
         all_movies = Movie.query.all()
         self.assertEqual(data['success'], True)
         self.assertEqual(data['deleted'], movie.id)
         self.assertEqual(len(all_movies), self.total_movies)
 
-    def test_delete_movie_404(self):
+    def test_delete_movie_not_found(self):
         res = self.client().delete('/movies/delete/0')
+        data = json.loads(res.data)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['error'], 404)
+
+    def test_actor_1_add(self):
+        res = \
+            self.client().post(f"/actors/add?name={self.test_actor['name']}&surname={self.test_actor['surname']}")
+        data = json.loads(res.data)
+        all_actors = Actor.query.all()
+        self.assertEqual(data['success'], True)
+        self.assertEqual(len(all_actors), self.total_actors+1)
+
+    def test_actor_2_update(self):
+        # get the test actor from the database
+        actor = Actor.query.filter_by(name=self.test_actor['name'].capitalize(),
+                surname=self.test_actor['surname'].capitalize()).one_or_none()
+        # update
+        res = self.client().patch(f"/actors/update/{actor.id}?name={self.test_actor['new_name']}")
+        data = json.loads(res.data)
+        actor = Actor.query.get(actor.id)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['updated'], actor.id)
+        # compare with lowercase because of automatic movie title
+        # capitalization upon input, see capitalize_all() helper function
+        self.assertEqual(actor.name.lower(), self.test_actor['new_name'])
+
+    def test_actor_3_delete(self):
+        actor = Actor.query.filter_by(name=self.test_actor['new_name'].capitalize(),
+                surname=self.test_actor['surname'].capitalize()).one_or_none()
+        res = self.client().delete(f"actors/delete/{actor.id}")
+        data = json.loads(res.data)
+        all_actors = Actor.query.all()
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], actor.id)
+        self.assertEqual(len(all_actors), self.total_actors)
+
+    def test_delete_actor_not_found(self):
+        res = self.client().delete('/actors/delete/0')
         data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['error'], 404)

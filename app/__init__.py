@@ -163,6 +163,66 @@ def create_app(test_config=None):
             'deleted': movie.id
             })
 
+# ----------------------------------------------------------------------
+    @app.route('/actors/add', methods=['POST'])
+    def add_actor():
+        try:
+            name = request.args.get('name').capitalize()
+            surname = request.args.get('surname').capitalize()
+            if (not name) or (not surname):
+                abort(400)
+            new_actor = Actor(
+                name=name,
+                surname=surname,
+            )
+            new_actor.insert()
+        except Exception:
+            abort(422)
+
+        return jsonify({
+            'success': True,
+            'added': new_actor.id
+            })
+
+    @app.route('/actors/update/<int:actor_id>', methods=['PATCH'])
+    def update_actor(actor_id):
+        try:
+            # get the object from id
+            actor = Actor.query.get(actor_id)
+            if not actor:
+                abort(404)
+            name = request.args.get('name')
+            surname = request.args.get('surname')
+            # update the object
+            if name:
+                actor.name = name.capitalize()
+            if surname:
+                actor.surname = surname.capitalize()
+            actor.update()
+        except Exception as e:
+            # abort(422)
+            raise e
+
+        return jsonify({
+            'success': True,
+            'updated': actor.id
+            })
+
+    @app.route('/actors/delete/<int:actor_id>', methods=['DELETE'])
+    def delete_actor(actor_id):
+        try:
+            actor = Actor.query.get(actor_id)
+            actor.delete()
+        except AttributeError:
+            abort(404)
+        except Exception:
+            abort(422)
+
+        return jsonify({
+            'success': True,
+            'deleted': actor.id
+            })
+
     # ERROR HANDLERS ---------------------------------------------------
     @app.errorhandler(400)
     def bad_request(error):
