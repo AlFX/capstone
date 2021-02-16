@@ -72,8 +72,18 @@ class Actor(db.Model):
     gender = db.Column(db.String(10))
     interpretation = db.relationship('Interpretation', back_populates='actor')
 
-    def format(self):
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
 
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def format(self):
         filmography = {x.movie.title : x.character for x in self.interpretation}
 
         return {
