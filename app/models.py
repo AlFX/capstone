@@ -10,7 +10,7 @@ movie_genre = db.Table(
     'movie_genre',
     db.Column('movie_id', db.Integer, db.ForeignKey('movies.id')),
     db.Column('genre_id', db.Integer, db.ForeignKey('genres.id'))
-    )
+)
 
 
 class Movie(db.Model):
@@ -21,6 +21,28 @@ class Movie(db.Model):
     genre = db.relationship('Genre', secondary=movie_genre, backref='movie')
     interpretation = db.relationship('Interpretation', back_populates='movie')
 
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def format(self):
+        genres = [genre.name for genre in self.genre]
+        cast = {x.actor.name + ' ' + x.actor.surname: x.character
+                for x in self.interpretation}
+        return {
+            'title': self.title,
+            'release_date': self.release_date,
+            'genre': genres,
+            'interpretation': cast,
+        }
+
     def __repr__(self):
         return f"<{self.id}, {self.title}, {self.release_date}>"
 
@@ -29,6 +51,13 @@ class Genre(db.Model):
     __tablename__ = 'genres'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120))
+
+    def format(self):
+        movies = [movie.title for movie in self.movie]
+        return {
+            'name': self.name,
+            'movies': movies
+        }
 
     def __repr__(self):
         return f"<{self.id}, {self.name}>"
@@ -42,6 +71,18 @@ class Actor(db.Model):
     dob = db.Column(db.DateTime, default=datetime.utcnow())
     gender = db.Column(db.String(10))
     interpretation = db.relationship('Interpretation', back_populates='actor')
+
+    def format(self):
+
+        filmography = {x.movie.title : x.character for x in self.interpretation}
+
+        return {
+            'name': self.name,
+            'surname': self.surname,
+            'dob': self.dob,
+            'gender': self.gender,
+            'filmography': filmography
+        }
 
     def __repr__(self):
         return f"<{self.id}, {self.name} {self.surname}, {self.dob}, {self.gender}>"
