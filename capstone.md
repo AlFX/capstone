@@ -30,7 +30,7 @@ FSND Capstone project
 ---
 
 - [x] Setup a remote Git [repository](https://github.com/AlFX/FSND_capstone)
-- [x] Setup the database
+- [x] **Setup the database**
     - [x] Create a database using `createdb <name>` in `postgres`
     - [x] Establish a connection to the database, add its URI to `config.py`
     - [x] Create the table models and estabilish relationships among them
@@ -45,12 +45,14 @@ FSND Capstone project
         dropdb <name> && createdb <name>
         ```
     - [x] Seed the database with `populate.py` and `dummy_data.py`
-- [ ] Write the tests for the routes
-- [ ] Write the basic app factory function in `__init__.py`
-- [ ] Write the routes which can either serve as API or to display views
-    - If a frontend is needed, write the HTML, CSS and Javascript for the views
-    - Remeber: they must satisfy the tests!
+- [x] Create the tests and then the endpoints: one test for success behavior of each endpoint and one test for error behavior of each endpoint
+    - [x] Write the tests for the routes
+    - [x] Write the basic app factory function in `__init__.py`
+    - [x] Write the routes which can either serve as API or to display views. If a frontend is needed, write the HTML, CSS and Javascript for the views
 - [ ] Test an alternative `models.py` file to make the relationships uniform, either using `backref` or `back_populates` but not both!
+- [ ] Add roles with their permissions
+- [ ] Specify permissions for each endpoint
+- [ ] Write at least two tests of [RBAC](https://en.wikipedia.org/wiki/Role-based_access_control) for each role
 - [ ] **Run the app**: `FLASK_APP=app.py FLASK_DEBUG=true flask run`
 - [ ] Setup the [roles](auth0.com)
 - [ ] Deploy to [Heroku](dashboard.heroku.com)
