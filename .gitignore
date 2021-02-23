@@ -1,8 +1,6 @@
 
 # Custom
-heroku_sample/
 venv/
-migrations/
 
 # Created by https://www.toptal.com/developers/gitignore/api/python,sublimetext,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,sublimetext,linux
