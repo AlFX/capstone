@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_cors import CORS
 
 from app.models import db, Actor, Movie, Genre
+from app.auth import requires_auth, get_token_auth_header, AuthError
 
 
 # APP FACTORY ----------------------------------------------------------
@@ -16,97 +17,57 @@ def create_app(test_config=None):
     migrate = Migrate(app, db)
     # CORS(app)
 
-    # ROUTES -----------------------------------------------------------
+# ROUTES ---------------------------------------------------------------
+
     @app.route('/')
     def index():
         return jsonify({
             'success': True,
             'message': 'Welcome!'
-            })
+        })
 
-    @app.route('/actors/<int:actor_id>')
-    def actor(actor_id):
-        try:
-            actor = Actor.query.get(actor_id)
-            return jsonify({
-                'success': True,
-                'actor': actor.format(),
-                })
-        except AttributeError:  # happens when actor is None
-            abort(404)
-        except Exception:
-            abort(422)
+    @app.route('/login-results')
+    def loggedin():
+        return jsonify({
+            'success': True,
+            'message': 'You are logged in.',
+            'token': get_token_auth_header()
+        })
 
-    @app.route('/actors')
-    def actors():
-        try:
-            actors = Actor.query.all()
-            actors = [actor.format() for actor in actors]
-            return jsonify({
-                'success': True,
-                'actor': actors
-                })
-        except AttributeError:
-            abort(404)
-        except Exception:
-            abort(422)
+    # MOVIES -----------------------------------------------------------
 
     @app.route('/movies/<int:movie_id>')
-    def movie(movie_id):
+    @requires_auth(permission='get:movies')
+    def movie(payload, movie_id):
         try:
             movie = Movie.query.get(movie_id)
             return jsonify({
                 'success': True,
                 'movie': movie.format(),
-                })
+            })
         except AttributeError:  # happens when movie is None
             abort(404)
         except Exception:
             abort(422)
 
     @app.route('/movies')
-    def movies():
+    @requires_auth(permission='get:movies')
+    def movies(payload):
         try:
             movies = Movie.query.all()
             movies = [movie.format() for movie in movies]
             return jsonify({
                 'success': True,
                 'movie': movies
-                })
-        except AttributeError:
-            abort(404)
-        except Exception:
-            abort(422)
-
-    @app.route('/genres/<int:genre_id>')
-    def genre(genre_id):
-        try:
-            genre = Genre.query.get(genre_id)
-            return jsonify({
-                'success': True,
-                'genre': genre.format(),
-                })
-        except AttributeError:  # happens when genre is None
-            abort(404)
-        except Exception:
-            abort(422)
-
-    @app.route('/genres')
-    def genres():
-        try:
-            genres = Genre.query.all()
-            genres = [genre.format() for genre in genres]
-            return jsonify({
-                'success': True,
-                'genre': genres
-                })
+            })
         except AttributeError:
             abort(404)
         except Exception:
             abort(422)
 
     @app.route('/movies/add', methods=['POST'])
-    def add_movie():
+    @requires_auth(permission='post:movies')
+    def add_movie(payload):
         try:
             title = capitalize_all(request.args.get('title'))
             if not title:
@@ -123,10 +84,11 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'added': new_movie.id
-            })
+        })
 
     @app.route('/movies/update/<int:movie_id>', methods=['PATCH'])
-    def update_movie(movie_id):
+    @requires_auth(permission='patch:movies')
+    def update_movie(payload, movie_id):
         try:
             # get the object from id
             movie = Movie.query.get(movie_id)
@@ -146,10 +108,11 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'updated': movie.id
-            })
+        })
 
     @app.route('/movies/delete/<int:movie_id>', methods=['DELETE'])
-    def delete_movie(movie_id):
+    @requires_auth(permission='delete:movies')
+    def delete_movie(payload, movie_id):
         try:
             movie = Movie.query.get(movie_id)
             movie.delete()
@@ -161,11 +124,74 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'deleted': movie.id
-            })
+        })
 
-# ----------------------------------------------------------------------
+    # GENRES -----------------------------------------------------------
+
+    @app.route('/genres/<int:genre_id>')
+    @requires_auth(permission='get:movies')
+    def genre(payload, genre_id):
+        try:
+            genre = Genre.query.get(genre_id)
+            return jsonify({
+                'success': True,
+                'genre': genre.format(),
+            })
+        except AttributeError:  # happens when genre is None
+            abort(404)
+        except Exception:
+            abort(422)
+
+    @app.route('/genres')
+    @requires_auth(permission='get:movies')
+    def genres(payload):
+        try:
+            genres = Genre.query.all()
+            genres = [genre.format() for genre in genres]
+            return jsonify({
+                'success': True,
+                'genre': genres
+            })
+        except AttributeError:
+            abort(404)
+        except Exception:
+            abort(422)
+
+    # ACTORS -----------------------------------------------------------
+
+    @app.route('/actors/<int:actor_id>')
+    @requires_auth(permission='get:actors')
+    def actor(payload, actor_id):
+        ''' get the actors full list '''
+        try:
+            actor = Actor.query.get(actor_id)
+            return jsonify({
+                'success': True,
+                'actor': actor.format(),
+            })
+        except AttributeError:  # happens when actor is None
+            abort(404)
+        except Exception:
+            abort(422)
+
+    @app.route('/actors')
+    @requires_auth(permission='get:actors')
+    def actors(payload):
+        try:
+            actors = Actor.query.all()
+            actors = [actor.format() for actor in actors]
+            return jsonify({
+                'success': True,
+                'actor': actors
+            })
+        except AttributeError:
+            abort(404)
+        except Exception:
+            abort(422)
+
     @app.route('/actors/add', methods=['POST'])
-    def add_actor():
+    @requires_auth(permission='post:actors')
+    def add_actor(payload):
         try:
             name = request.args.get('name').capitalize()
             surname = request.args.get('surname').capitalize()
@@ -182,10 +208,11 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'added': new_actor.id
-            })
+        })
 
     @app.route('/actors/update/<int:actor_id>', methods=['PATCH'])
-    def update_actor(actor_id):
+    @requires_auth(permission='patch:actors')
+    def update_actor(payload, actor_id):
         try:
             # get the object from id
             actor = Actor.query.get(actor_id)
@@ -206,10 +233,11 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'updated': actor.id
-            })
+        })
 
     @app.route('/actors/delete/<int:actor_id>', methods=['DELETE'])
-    def delete_actor(actor_id):
+    @requires_auth(permission='delete:actors')
+    def delete_actor(payload, actor_id):
         try:
             actor = Actor.query.get(actor_id)
             actor.delete()
@@ -221,7 +249,7 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'deleted': actor.id
-            })
+        })
 
     # ERROR HANDLERS ---------------------------------------------------
     @app.errorhandler(400)
@@ -230,7 +258,15 @@ def create_app(test_config=None):
             'success': False,
             'error': 400,
             'message': 'Bad request.'
-            })
+        })
+
+    @app.errorhandler(AuthError)
+    def unauthorized(error):
+        return jsonify({
+            'success': False,
+            'error': 401,
+            'message': 'Unauthorized.'
+        })
 
     @app.errorhandler(404)
     def not_found(error):
@@ -238,7 +274,7 @@ def create_app(test_config=None):
             'success': False,
             'error': 404,
             'message': 'Not found.'
-            })
+        })
 
     @app.errorhandler(422)
     def unprocessable_entity(error):
