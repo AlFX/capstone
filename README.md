@@ -56,10 +56,10 @@ python -m pip install -r requirements.txt   # install dependencies
 
 Once done the above, setup and populate the database as follows:
 ```bash
-flask db init          # initialize the migrations
-flask db migrate       # detect the changes in the database tables
-flask db upgrade       # create/update the database schema
-python populate        # populate the database with toy data
+flask db init                               # initialize the migrations
+flask db migrate                            # detect the changes in the database tables
+flask db upgrade                            # create/update the database schema
+python populate.py                          # launch a script to populate the database with toy data
 ```
 
 
@@ -69,8 +69,6 @@ Make sure that `setup.sh` has been sourced as per previous instruction (this, am
 ```bash
 python -m tests.runner
 ```
-
-### Endpoint conventions and Error codes
 
 ### API endpoints
 
@@ -93,41 +91,282 @@ Below are all the endpoints with a brief description:
 
 #### `GET /`
 
-- Displays the home page with this API documentation. Not intended to be called by API clients.
+- Displays the home page
+- Available to anyone
 - Request Arguments: None
 - Returns: Rendered HTML
 
 
 #### `GET /movies`
 
+- Displays the whole list of movies
+- Available to all roles
+- Request Arguments: None
+- Returns: json data
+
+```json
+{
+    "movie": [
+        {
+            "genre": [
+                "Drama",
+                "Romance"
+            ],
+            "interpretation": {
+                "Humphrey Bogart": "Rick Blaine",
+                "Ingrid Bergman": "Ilsa Lund"
+            },
+            "release_date": "Thu, 26 Nov 1942 00:00:00 GMT",
+            "title": "Casablanca"
+        },
+
+        ... truncated for brevity ...
+
+        {
+            "genre": [
+                "Crime"
+            ],
+            "interpretation": {
+                "Humphrey Bogart": "maj. Frank McCloud",
+                "Lauren Bacall": "Nora Temple"
+            },
+            "release_date": "Thu, 01 Jan 1948 00:00:00 GMT",
+            "title": "Key Largo"
+        }
+    ],
+    "success": true
+}
+```
 
 #### `GET /movies/<movie_id>`
 
+- Displays a single movie
+- Available to all roles
+- Request Arguments: movie id
+- Returns: json data
+
+```json
+{
+    "movie": {
+        "genre": [
+            "Drama",
+            "Romance"
+        ],
+        "interpretation": {
+            "Humphrey Bogart": "Rick Blaine",
+            "Ingrid Bergman": "Ilsa Lund"
+        },
+        "release_date": "Thu, 26 Nov 1942 00:00:00 GMT",
+        "title": "Casablanca"
+    },
+    "success": true
+}
+```
 
 #### `POST /movies/add`
 
+- Adds a single movie to the database
+- Available to the Executive Producer role only
+- Request Arguments: json data (title, publication date)
+- Returns: json data
+
+```json
+{
+    "added": <new_movie.id>,
+    "success": true
+}
+```
 
 #### `PATCH /movies/update/<movie_id>`
 
+- Edits a single movie to the database
+- Available to the Casting Director and Executive Producer roles only
+- Request Arguments: movie id
+- Returns: json data
+
+```json
+{
+    "updated": <movie.id>,
+    "success": true
+}
+```
 
 #### `DELETE /movies/delete/<movie_id>`
 
+- Deletes a single movie to the database
+- Available to the Executive Producer role only
+- Request Arguments: movie id
+- Returns: json data
+
+```json
+{
+    "deleted": <movie.id>,
+    "success": true
+}
+```
 
 #### `GET /genres`
+
+- Displays the whole list of genres
+- Available to all roles
+- Request Arguments: None
+- Returns: json data
+
+```json
+{
+    "genre": [
+
+        ... truncated for brevity ...
+
+        {
+            "movies": [
+                "The Big Sleep",
+                "The Maltese Falcon",
+                "Key Largo"
+            ],
+            "name": "Crime"
+        },
+        {
+            "movies": [
+                "Casablanca"
+            ],
+            "name": "Drama"
+        },
+
+        ... truncated for brevity ...
+
+    ],
+    "success": true
+}
+```
 
 
 #### `GET /genres/<genre_id>`
 
+- Displays a single genre
+- Available to all roles
+- Request Arguments: genre id
+- Returns: json data
+
+```json
+{
+    "genre": {
+        "movies": [
+            "The Big Sleep",
+            "The Maltese Falcon",
+            "Key Largo"
+        ],
+        "name": "Crime"
+    },
+    "success": true
+}
+```
+
 
 #### `GET /actors`
+
+- Displays the whole list of actors
+- Available to all roles
+- Request Arguments: None
+- Returns: json data
+
+```json
+{
+    "actor": [
+        {
+            "dob": "Mon, 25 Dec 1899 00:00:00 GMT",
+            "filmography": {
+                "Casablanca": "Rick Blaine",
+                "Key Largo": "maj. Frank McCloud",
+                "Sabrina": "Linus Larrabee",
+                "The Big Sleep": "Philip Marlowe",
+                "The Maltese Falcon": "Sam Spade"
+            },
+            "gender": "male",
+            "name": "Humphrey",
+            "surname": "Bogart"
+        },
+
+        ... truncated for brevity ...
+
+        {
+            "dob": "Thu, 28 May 1925 00:00:00 GMT",
+            "filmography": {
+                "The Big Sleep": "Carmen Sternwood"
+            },
+            "gender": "female",
+            "name": "Martha",
+            "surname": "Vickers"
+        }
+    ],
+    "success": true
+```
 
 
 #### `GET /actors/<actor_id>`
 
+- Displays a single actor
+- Available to all roles
+- Request Arguments: actor id
+- Returns: json data
+
+```json
+{
+    "actor": {
+        "dob": "Mon, 25 Dec 1899 00:00:00 GMT",
+        "filmography": {
+            "Casablanca": "Rick Blaine",
+            "Key Largo": "maj. Frank McCloud",
+            "Sabrina": "Linus Larrabee",
+            "The Big Sleep": "Philip Marlowe",
+            "The Maltese Falcon": "Sam Spade"
+        },
+        "gender": "male",
+        "name": "Humphrey",
+        "surname": "Bogart"
+    },
+    "success": true
+}
+```
 
 #### `POST /actors/add`
 
+- Add a single actor to the database
+- Available to the Casting Director and Executive Producer roles only
+- Request Arguments: actor data (name, surname, date of birth, gender)
+- Returns: json data
+
+```json
+{
+    "added": <actor.id>,
+    "success": true
+}
+```
 
 #### `PATCH /actors/update/<actor_id>`
 
+- Edits a single actor from the database
+- Available to the Casting Director and Executive Producer roles only
+- Request Arguments: actor id
+- Returns: json data
 
+```json
+{
+    "updated": <actor.id>,
+    "success": true
+}
+```
+
+#### `DELETE /actors/delete/<actor_id>`
+
+- Deletes a single actor from the database
+- Available to the Casting Director and Executive Producer roles only
+- Request Arguments: actor id
+- Returns: json data
+
+```json
+{
+    "deleted": <actor.id>,
+    "success": true
+}
+```

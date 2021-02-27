@@ -24,10 +24,6 @@ def create_app(production=False):
 
     @app.route('/')
     def index():
-        # return jsonify({
-        #     'success': True,
-        #     'message': 'Welcome!'
-        # })
         return '<h1>Welcome to Casting Agency API!</h1>'
 
     @app.route('/login-results')
