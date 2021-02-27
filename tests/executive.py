@@ -71,10 +71,9 @@ class ExecutiveTestCase(unittest.TestCase):
 
     def test_index(self):
         res = self.client().get('/')
-        data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['message'], 'Welcome!')
+        self.assertEqual(res.data.decode('utf-8'),
+                         '<h1>Welcome to Casting Agency API!</h1>')
 
     # ACTORS -----------------------------------------------------------
 

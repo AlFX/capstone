@@ -2,17 +2,20 @@ import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_cors import CORS
+# from flask_cors import CORS
 
 from app.models import db, Actor, Movie, Genre
 from app.auth import requires_auth, get_token_auth_header, AuthError
 
 
 # APP FACTORY ----------------------------------------------------------
-def create_app(test_config=None):
+def create_app(production=False):
     # create and configure the app
     app = Flask(__name__)
-    app.config.from_object('app.config.Config')
+    if production:
+        app.config.from_object('app.config.Production')
+    else:
+        app.config.from_object('app.config.Config')
     db.init_app(app)
     migrate = Migrate(app, db)
     # CORS(app)
@@ -21,18 +24,15 @@ def create_app(test_config=None):
 
     @app.route('/')
     def index():
-        return jsonify({
-            'success': True,
-            'message': 'Welcome!'
-        })
+        # return jsonify({
+        #     'success': True,
+        #     'message': 'Welcome!'
+        # })
+        return '<h1>Welcome to Casting Agency API!</h1>'
 
     @app.route('/login-results')
     def loggedin():
-        return jsonify({
-            'success': True,
-            'message': 'You are logged in.',
-            'token': get_token_auth_header()
-        })
+        return '<h1>Please copy the JWT</h1>'
 
     # MOVIES -----------------------------------------------------------
 

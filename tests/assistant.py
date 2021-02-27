@@ -12,7 +12,6 @@ class AssistantTestCase(unittest.TestCase):
     variable. Its permissions are as follows:
 
     - view actor
-
     - view movie
     '''
 
@@ -20,16 +19,17 @@ class AssistantTestCase(unittest.TestCase):
         ''' Executed before each test function '''
         self.app = create_app()
         self.client = self.app.test_client
-        self.user = 'postgres'
-        self.pw = 'postgres'
-        self.host = 'localhost'
-        self.port = '5432'
-        self.db_name = 'capstone'
-        self.database_path = \
-            f'postgresql://{self.user}:{self.pw}@{self.host}:{self.port}/{self.db_name}'
+        self.app.config.from_object('app.config.Config')
+        # self.user = 'postgres'
+        # self.pw = 'postgres'
+        # self.host = 'localhost'
+        # self.port = '5432'
+        # self.db_name = 'capstone'
+        # self.database_path = \
+        #     f'postgresql://{self.user}:{self.pw}@{self.host}:{self.port}/{self.db_name}'
 
-        self.app.config["SQLALCHEMY_DATABASE_URI"] = self.database_path
-        self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+        # self.app.config["SQLALCHEMY_DATABASE_URI"] = self.database_path
+        # self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         db.app = self.app
         db.init_app(self.app)
         db.create_all()
@@ -64,10 +64,9 @@ class AssistantTestCase(unittest.TestCase):
 
     def test_index(self):
         res = self.client().get('/')
-        data = json.loads(res.data)
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertEqual(data['message'], 'Welcome!')
+        self.assertEqual(res.data.decode('utf-8'),
+                         '<h1>Welcome to Casting Agency API!</h1>')
 
     # ACTORS -----------------------------------------------------------
 
@@ -281,9 +280,3 @@ class AssistantTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['genre']), self.total_genres)
-
-
-if __name__ == '__main__':
-    unittest.main()
-
-# run with `python -m tests.tests`

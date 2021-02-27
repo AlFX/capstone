@@ -11,8 +11,8 @@ suite = unittest.TestSuite()
 
 # load the tests into the suite
 suite.addTests(loader.loadTestsFromModule(assistant))
-suite.addTests(loader.loadTestsFromModule(director))
-suite.addTests(loader.loadTestsFromModule(executive))
+# suite.addTests(loader.loadTestsFromModule(director))
+# suite.addTests(loader.loadTestsFromModule(executive))
 
 # initialize tests runner
 runner = unittest.TextTestRunner(verbosity=1)
