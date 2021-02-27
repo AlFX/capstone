@@ -27,16 +27,7 @@ class ExecutiveTestCase(unittest.TestCase):
         ''' Executed before each test function '''
         self.app = create_app()
         self.client = self.app.test_client
-        self.user = 'postgres'
-        self.pw = 'postgres'
-        self.host = 'localhost'
-        self.port = '5432'
-        self.db_name = 'capstone'
-        self.database_path = \
-            f'postgresql://{self.user}:{self.pw}@{self.host}:{self.port}/{self.db_name}'
-
-        self.app.config["SQLALCHEMY_DATABASE_URI"] = self.database_path
-        self.app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+        self.app.config.from_object('app.config.Config')
         db.app = self.app
         db.init_app(self.app)
         db.create_all()
