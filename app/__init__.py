@@ -5,7 +5,7 @@ from flask_migrate import Migrate
 # from flask_cors import CORS
 
 from app.models import db, Actor, Movie, Genre
-from app.auth import requires_auth, get_token_auth_header, AuthError
+from app.auth import requires_auth, AuthError
 
 
 # APP FACTORY ----------------------------------------------------------
